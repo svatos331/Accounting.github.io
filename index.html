@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Камера с кнопкой</title>
+
+</head>
+<body>
+
+
+<style>
+	body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background: #000;
+		color: white;
+		font-family: sans-serif;
+	}
+	video {
+		height: 100vh;
+		border-radius: 8px;
+	}
+	button {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+		background: white;
+		border: none;
+		cursor: pointer;
+		z-index: 999;
+		position: absolute;
+		bottom: 20px;
+	}
+	canvas {
+		display: none;
+	}
+</style>
+<video id="camera" autoplay playsinline></video>
+<button id="capture"></button>
+<canvas id="snapshot"></canvas>
+
+<script>
+	const video = document.getElementById('camera');
+	const canvas = document.getElementById('snapshot');
+	const captureBtn = document.getElementById('capture');
+
+	navigator.mediaDevices.getUserMedia({ video: true })
+		.then(stream => video.srcObject = stream)
+		.catch(err => alert('Ошибка доступа к камере: ' + err));
+
+	captureBtn.addEventListener('click', () => {
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(video, 0, 0);
+
+		canvas.toBlob(blob => {
+			const formData = new FormData();
+			formData.append('data', blob, 'image.jpg');
+
+			fetch('https://sviatoslav.app.n8n.cloud/webhook-test/64018109-935c-439c-9e65-2bb54a3f6217', {
+				method: 'POST',
+				body: formData
+			})
+				.then(res => console.log('Фото отправлено'))
+				.catch(err => console.error('Ошибка отправки:', err));
+		}, 'image/jpeg');
+	});
+</script>
+
+
+</body>
+</html>
+
+
