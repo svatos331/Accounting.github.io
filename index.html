@@ -45,11 +45,19 @@
 	const canvas = document.getElementById('snapshot');
 	const captureBtn = document.getElementById('capture');
 
-	navigator.mediaDevices.getUserMedia({ video: {
-			facingMode: { exact: "environment" } // "user" — фронтальная, "environment" — задняя
-		} })
-		.then(stream => video.srcObject = stream)
-		.catch(err => alert('Ошибка доступа к камере: ' + err));
+	navigator.mediaDevices.enumerateDevices()
+		.then(devices => {
+			const videoDevices = devices.filter(d => d.kind === 'videoinput');
+			const backCamera = videoDevices.find(d => d.label.toLowerCase().includes('back'));
+
+			return navigator.mediaDevices.getUserMedia({
+				video: backCamera ? { deviceId: { exact: backCamera.deviceId } } : { facingMode: 'environment' }
+			});
+		})
+		.then(stream => {
+			video.srcObject = stream;
+		})
+		.catch(err => console.error(err));
 
 	captureBtn.addEventListener('click', () => {
 		canvas.width = video.videoWidth;
