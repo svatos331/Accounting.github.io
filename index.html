@@ -45,7 +45,9 @@
 	const canvas = document.getElementById('snapshot');
 	const captureBtn = document.getElementById('capture');
 
-	navigator.mediaDevices.getUserMedia({ video: true })
+	navigator.mediaDevices.getUserMedia({ video: {
+			facingMode: { exact: "environment" } // "user" — фронтальная, "environment" — задняя
+		} })
 		.then(stream => video.srcObject = stream)
 		.catch(err => alert('Ошибка доступа к камере: ' + err));
 
